@@ -163,7 +163,6 @@ is:
   697184ece37c024d3319f16f3e98c597: 'Smelltu hér til að þiggja boðið:'
   c1a5298f939e87e8f962a5edfc206918: Hæ
   a5998dfe5002eeab05de3cbcc98f9544: Þetta er sjálvirkur tölvupóstur %{instance_name}
-  cd951d0ddb879ce3b7af243cad30f012: Engin rök á móti ennþá
   b05d72142020283dc6812fd3a9bc691c: Gleymt lykilorð
   8e53b553c0d5323dadb9e738f19323d4: Þegar ég vinn eða tapa samfélagsstigum
   65e1f75e1c318e9d7a0c4690e4841fd3: Þegar stöðu á hugmynd er breytt
@@ -257,8 +256,8 @@ is:
     lausn fyrir %{eve_link} vef %{ccp_link}.
   c428492f00d9e51ce05abf306d2ff59b: Fólk sendir inn hugmyndir og rökræða þær í einföldu
     en öflugu rökræðukerfi.
-  2f64c030f4bec3e2c21e78506cc78f63: Efstu 25 hugmyndir á %{instance_name}
   37fc5aed92a40b16dafd17cee72e3154: Efstu hugmyndir
+  2f64c030f4bec3e2c21e78506cc78f63: Efstu 25 hugmyndir á %{instance_name}
   ac876a06a03e14d880f4cd06058a34ae: Efsta flæði %{sub_instance_name}
   e254a34f3a1001f00adc55aba5552783: Efst
   c4e0e4e3118472beeb2ae75827450f1f: NIÐUR
@@ -354,9 +353,8 @@ is:
   03368e3c1eb4d2a9048775874301b19f: Veldu málaflokk
   7dd982d0948637b4ae83f2804bd489ca: Afhverju ætti fólk að styðja þína hugmynd?
   2e6c2d96aaacc8ef06d0ea12237cfc2e: Það þarf að fylla í alla reiti
-  d7241b155164fdbc560602f924393149: Skráðu hugmynd þína og rök á Betra Ísland
+  d7241b155164fdbc560602f924393149: Skráðu hugmynd þína og rök
   586f9d3669a73e12a8caed7a7d76288e: Veldu góðan, lýsandi titil á hugmyndina þína
-  13af6b983fc9bbd55699881a1023a539: Nei
   cdd559fd8bda4b2bdf1cdbca181b38b9: Útskýrðu hugmyndina í nokkrum málsgreinum og reyndu
     að hafa textann hnitmiðaðan.
   e1e583ed208b1fbecec8b65dc272a098: Er þessi hugmynd  frá %{user_name} persónuleg
@@ -428,6 +426,7 @@ is:
   1cab6f0a48459aaac4e3116773de5781: ég mun ekki birta auglýsingar eða senda ruslpóst
     í gegnum BÍ
   3bc9cc15d02611dc4781a6ce6bf86710: Kjósa upp
+  13af6b983fc9bbd55699881a1023a539: Nei
   1a8e4f3a313d948ac095a8d24110c1b1: '%{count} studdu'
   03fa96387303a39d8a63c153bac26958: 'Við áskiljum okkur rétt til að:'
   5e45d0479ee365f79d004b2f4ecb1f27: bætti %{point_name} við %{idea_name}
@@ -553,6 +552,7 @@ is:
     your permission)
   d1b44fa378a165b8c319fe0b0f08f231: (Þurfum þetta vegna skráningar en munum aldrei
     láta í hendur 3 aðila)
+  09a1e75ab40c7bb5efb09d013aff3a53: Bættu við rökum með
   a4b522102353672b9f0d5582e8386348: uppgefnar upplýsingar um mig eru réttar og að
     ég hef einn aðgang að tölvupósti á uppgefnu netfangi og get bæði móttekið og lesið
     tölvupóst og að BÍ megi senda mér tölvupóst á það netfang
@@ -595,6 +595,7 @@ is:
     núna.
   26582fa147339efa1e6fc50cc9602f65: Þú getur notað karma stig til að kaupa kynningar
     efst á síðunni fyrir hugmyndir sem þú styður.
+  498f79c4c5bbde77f1bceb6c86fd0f6d: Sýna
   2d39a06c50a6c1ad4871b8e8551bdda2: Engar hugmyndir ennþá.
   10ac3d04253ef7e1ddc73e6091c0cd55: Næst
   views:
@@ -613,3 +614,10 @@ is:
   dcab30df167c93ffafaf59a49789cefa: Betra Ísland er öflug lýðræðisvefsíða hönnuð af
     non profit Citizens Foundation til að hjálpa hópum af fólki til að tala með einni
     rödd.
+  42a965482d059f063d4503251a2548b8: Bættu við rökum á móti
+  7e48b42c2a2f584925675cc365bf8839: Breyta flokk
+  52015afb6ec8b940ef903ff73f4c4058: Nýr flokkur
+  6007de624f30af50629e5cb3b9db4e66: Vista hugmynd
+  d43686420438e917216d81506320e6f2: "Við höfum breytt flokki fyrir þína hugmynd <a href='%{idea_link}'>%{idea_name}</a> frá %{category_from} í %{category_to} á %{instance_name}."
+  39a3cf4c89d1ffa6eddb8a1ae6a8bae9: "Flokki hefur verið breytt fyrir þína hugmynd %{idea}"
+  4c0d946321563c8bf049de4cc6473281: "Flokki hefur verið breytt"

@@ -79,8 +79,7 @@ class User < ActiveRecord::Base
   has_one :profile, :dependent => :destroy
 
   has_many :unsubscribes, :dependent => :destroy
-  has_many :signups
-  has_many :sub_instances, :through => :signups
+  #has_many :signups
     
   has_many :endorsements, :dependent => :destroy
   has_many :ideas, :conditions => "endorsements.status = 'active'", :through => :endorsements
@@ -264,10 +263,10 @@ class User < ActiveRecord::Base
 
   def self.find_for_twitter_oauth(auth, signed_in_resource=nil)
     if auth.uid and auth.uid!=""
-      Rails.logger.info("Logging in with twitter uid #{auth.uid} #{auth.credentials.token} #{auth.credentials.secret} #{auth.extra.raw_info.profile_image_url_https}")
+      Rails.logger.debug("Logging in with twitter uid #{auth.uid} #{auth.credentials.token} #{auth.credentials.secret} #{auth.extra.raw_info.profile_image_url_https}")
       user = User.where(:twitter_id => auth.uid).first
       unless user
-        Rails.logger.info("Creating new twitter user #{auth.extra.raw_info.name}")
+        Rails.logger.debug("Creating new twitter user #{auth.extra.raw_info.name}")
         user = User.create(:login=>auth.extra.raw_info.name,
                            :twitter_id=>auth.uid,
                            :twitter_token=>auth.credentials.token,
@@ -352,7 +351,11 @@ class User < ActiveRecord::Base
   end
   
   def new_user_signedup
-    ActivityUserNew.create(:user => self, :sub_instance => sub_instance)
+    begin
+      ActivityUserNew.create(:user => self, :sub_instance => sub_instance)
+    rescue
+      Rails.logger.error("Couldn't create ActivityUserNew")
+    end
   end
 
   def check_contacts
@@ -442,7 +445,7 @@ class User < ActiveRecord::Base
     #for c in constituents
     #  c.destroy
     #end
-    self.facebook_uid = nil
+    #self.facebook_uid = nil
     save(:validate => false)
   end
   
@@ -753,7 +756,7 @@ class User < ActiveRecord::Base
 
     if capitals_difference > 0 and self.is_capital_subscribed and self.status == "active"
       #User.delay.send_capital_email(self.activities.last.id, capitals_difference)
-      Rails.logger.info("Sending capital email")
+      Rails.logger.debug("Sending capital email")
       SendCapitalEmail.perform_in(3.seconds, self.activities.last.id, capitals_difference)
     else
       Rails.logger.info("----------------> Not sending capital email #{capitals_difference} and #{!self.is_admin} and #{self.is_capital_subscribed} and #{self.status}")
@@ -1078,6 +1081,7 @@ class User < ActiveRecord::Base
     idea = Idea.unscoped.find(idea_id)
     all_endorsers_and_opposers_for_idea(idea_id).each do |user|
       next unless user.is_finished_subscribed
+      next unless user.email and user.email.include?("@")
       position = Endorsement.unscoped.where(idea_id: idea_id, user_id: user.id).first.value
       UserMailer.idea_status_update(idea, status, date, subject, message, user, position).deliver
     end

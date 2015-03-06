@@ -25,7 +25,7 @@ YourPriorities::Application.routes.draw do
     omniauth_callbacks: "users/omniauth_callbacks",
   }
 
-  mount Monologue::Engine, at: '/blog'
+  #mount Monologue::Engine, at: '/blog'
 
   resources :categories
 
@@ -157,6 +157,10 @@ YourPriorities::Application.routes.draw do
       get :comments
       get :documents
       get :update_status
+      get :move
+      post :move
+      get :change_category
+      put :change_category
   	end
   	collection do
       get :yours
@@ -333,6 +337,7 @@ YourPriorities::Application.routes.draw do
   match ':controller/:action' => '#index'
   match ':controller/:action.:format' => '#index'
   match '/:controller(/:action(/:id))'
+  match ':redirect' => redirect("/404.html"), :as => :catchall , :constraints => { :redirect => /.*/i }
 end
   # The idea is based upon order of creation:
   # first created -> highest idea.

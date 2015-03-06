@@ -1,6 +1,6 @@
 source 'https://rubygems.org'
 
-gem 'rails', '3.2.17'
+gem 'rails', '3.2.21'
 ruby '2.0.0'
 gem "respond-rails", :git=>"git://github.com/rbjarnason/respond-rails"
 gem 'selectivizr-rails', :git=>"git://github.com/rbjarnason/selectivizr-rails"
@@ -27,8 +27,9 @@ gem 'puma'
 gem 'test-unit'
 #gem 'passenger'
 #gem 'brcypt-ruby', '3.0.0'
-gem "tinymce-rails",'<= 3.5.6'
+#gem "tinymce-rails",'<= 3.5.6'
 gem 'foundation-will_paginate'
+gem 'rack-cors', :require => 'rack/cors'
 #gem "will_paginate-foundation"
 #gem 'foundation_rails_helper', :git=>'git://github.com/rbjarnason/foundation_rails_helper'
 #gem 'omniauth-oauth2'
@@ -53,7 +54,6 @@ gem 'auto_html'
 #gem 'resque', "~> 1.22.0"
 #gem "resque"
 gem 'rmagick', require: false
-gem 'monologue','0.2.0'
 gem 'unicorn'
 gem 'sidekiq'
 #gem "thin"

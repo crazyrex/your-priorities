@@ -62,6 +62,17 @@ def change_to_mysql_text(text)
 end
 
 namespace :fix do
+  desc "Resend status msg"
+  task :resend_status_msg do
+    Thread.current[:skip_default_scope_globally] = true
+    IdeaStatusChangeLog.where(["created_at <= ? AND created_at >= ?",DateTime.parse("17/02/2015 13:00"), DateTime.parse("28/01/2015 05:00")]).each do |change_log|
+      next if change_log.id<2399
+      puts change_log.id
+      idea = Idea.find(change_log.idea_id)
+      User.send_status_email(idea.id, idea.official_status, change_log.date, change_log.subject, change_log.content)
+    end
+    Thread.current[:skip_default_scope_globally] = nil
+  end
 
   desc "FixCat"
   task :fix_cat do

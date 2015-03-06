@@ -5,7 +5,8 @@ class IdeasController < ApplicationController
 
   before_filter :authenticate_user!, :only => [:yours_finished, :yours_ads, :yours_top, :yours_lowest, :consider, :flag_inappropriate, :comment, :edit, :update,
                                            :tag, :tag_save, :opposed, :endorsed, :destroy, :new]
-  before_filter :authenticate_admin!, :only => [:bury, :successful, :compromised, :intheworks, :failed, :abusive, :not_abusive]
+  before_filter :authenticate_admin!, :only => [:bury, :successful, :compromised, :intheworks, :failed, :abusive, :not_abusive, :move]
+  before_filter :authenticate_sub_admin!, :only => [:change_category]
   before_filter :load_endorsement, :only => [:show, :show_feed, :activities, :endorsers, :opposers, :opposer_points, :endorser_points, :neutral_points, :everyone_points,
                                              :opposed_top_points, :endorsed_top_points, :idea_detail, :top_points, :discussions, :everyone_points ]
 #  before_filter :disable_sub_nav, :only => [:show, :show_feed, :activities, :endorsers, :opposers, :opposer_points, :endorser_points, :neutral_points, :everyone_points,
@@ -52,7 +53,47 @@ class IdeasController < ApplicationController
       }
     end
   end
-  
+
+  def move
+    # This function can only be used when users are shared between sub instances
+    if request.post? and ENV['YRPRI_ALL_DOMAIN']
+      from_sub_instance = SubInstance.current
+      to_sub_instance = SubInstance.find(params[:idea][:sub_instance])
+      SubInstance.current = to_sub_instance
+      to_category_id = Category.first.id
+      SubInstance.current = from_sub_instance
+      @idea.sub_instance_id = to_sub_instance.id
+      @idea.category_id = to_category_id
+      @idea.save(:validate=>false)
+      Point.unscoped.where(:idea_id=>@idea.id).each do |point|
+        point.sub_instance_id = to_sub_instance.id
+        point.save(:validate=>false)
+      end
+      Endorsement.unscoped.where(:idea_id=>@idea.id).each do |item|
+        item.sub_instance_id = to_sub_instance.id
+        item.save(:validate=>false)
+      end
+      Activity.unscoped.where(:idea_id=>@idea.id).each do |item|
+        item.sub_instance_id = to_sub_instance.id
+        item.save(:validate=>false)
+        Comment.unscoped.where(:activity_id=>item.id).each do |item|
+          item.sub_instance_id = to_sub_instance.id
+          item.save(:validate=>false)
+        end
+      end
+      Ad.unscoped.where(:idea_id=>@idea.id).each do |item|
+        item.sub_instance_id = to_sub_instance.id
+        item.save(:validate=>false)
+      end
+      ViewedIdea.unscoped.where(:idea_id=>@idea.id).each do |item|
+        item.sub_instance_id = to_sub_instance.id
+        item.save(:validate=>false)
+      end
+      UserMailer.sub_instance_changed(@idea.user, @idea, from_sub_instance, to_sub_instance, params[:idea][:finished_status_message]).deliver
+      redirect_to @idea.show_url
+    end
+  end
+
   # GET /ideas/yours
   def yours
     @page_title = tr("Your #{IDEA_TOKEN_PLURAL} at {sub_instance_name}", "controller/ideas", :sub_instance_name => current_sub_instance.name)
@@ -534,6 +575,7 @@ class IdeasController < ApplicationController
   end  
   
   def everyone_points
+    return redirect_to_idea
     @page_title = tr("Best points on {idea_name}", "controller/ideas", :idea_name => @idea.name)
     @point_value = 0 
     @points = @idea.points.published.by_helpfulness.paginate :page => params[:page], :per_page => params[:per_page]
@@ -546,6 +588,7 @@ class IdeasController < ApplicationController
   end  
 
   def opposed_top_points
+    return redirect_to_idea
     @page_title = tr("Points opposing {idea_name}", "controller/ideas", :idea_name => @idea.name)
     @point_value = -1
     if params[:by_newest]
@@ -562,6 +605,7 @@ class IdeasController < ApplicationController
   end
   
   def endorsed_top_points
+    return redirect_to_idea
     @page_title = tr("Points supporting {idea_name}", "controller/ideas", :idea_name => @idea.name)
     @point_value = 1
     if params[:by_newest]
@@ -583,6 +627,8 @@ class IdeasController < ApplicationController
   end
 
   def top_points
+    return redirect_to_idea
+
     @page_title = tr("Top points", "controller/ideas", :idea_name => @idea.name)
     @activities = @idea.activities.active.top_discussions.for_all_users :include => :user
     setup_top_points(50000)
@@ -636,6 +682,7 @@ class IdeasController < ApplicationController
   
   # GET /ideas/1/endorsers
   def endorsers
+    return redirect_to_idea
     @page_title = tr("{number} people endorse {idea_name}", "controller/ideas", :idea_name => @idea.name, :number => @idea.up_endorsements_count)
     if request.format != 'html'
       @endorsements = @idea.endorsements.active_and_inactive.endorsing.paginate :page => params[:page], :per_page => params[:per_page], :include => :user
@@ -649,6 +696,7 @@ class IdeasController < ApplicationController
 
   # GET /ideas/1/opposers
   def opposers
+    return redirect_to_idea
     @page_title = tr("{number} people opposed {idea_name}", "controller/ideas", :idea_name => @idea.name, :number => @idea.down_endorsements_count)
     if request.format != 'html'
       @endorsements = @idea.endorsements.active_and_inactive.opposing.paginate :page => params[:page], :per_page => params[:per_page], :include => :user
@@ -1127,6 +1175,36 @@ class IdeasController < ApplicationController
     end
   end
 
+  def change_category
+    @idea = Idea.find(params[:id])
+    @page_name = tr("Change category for {idea_name}", "controller/ideas", :idea_name => @idea.name)
+
+    if params[:idea]
+      if params[:idea][:category]
+        old_category = @idea.category
+        new_category = Category.find(params[:idea][:category])
+      end
+    end
+    if request.put?
+      respond_to do |format|
+        if params[:idea] and old_category and new_category and old_category != new_category
+          @idea.category_id = new_category.id
+          saved = @idea.save(:validate=>false)
+          if saved
+            UserMailer.category_changed(@idea.user, @idea, old_category, new_category).deliver
+          end
+        end
+        format.html {
+          if saved
+            flash[:notice] = tr("Category changed", "controller/ideas")
+          end
+          redirect_to(@idea)
+        }
+        @idea.reload
+      end
+    end
+  end
+
   private
   
     def get_endorsements
@@ -1137,7 +1215,7 @@ class IdeasController < ApplicationController
     end
     
     def load_endorsement
-      @idea = Idea.unscoped.find(params[:id])
+      load_idea
       if @idea.status == 'removed' or @idea.status == 'abusive'
         flash[:notice] = tr("That #{IDEA_TOKEN} was deleted", "controller/ideas")
         redirect_to "/"
@@ -1149,6 +1227,10 @@ class IdeasController < ApplicationController
         @endorsement = @idea.endorsements.active.find_by_user_id(current_user.id)
       end
     end    
+
+    def redirect_to_idea
+      redirect_to @idea.show_url, :status => :moved_permanently
+    end
 
     def get_qualities(multi_points=nil)
       if multi_points
@@ -1190,13 +1272,26 @@ class IdeasController < ApplicationController
       end
     end
 
+    def load_idea
+      if not @idea and params[:id]
+        begin
+          @idea = Idea.find(params[:id])
+        rescue
+          @idea = Idea.unscoped.find(params[:id])
+          if @idea
+            redirect_to @idea.show_url, :status => :moved_permanently
+          end
+        end
+      end
+    end
+
     def setup_menu_items
       @items = Hash.new
       item_count = 0
 
-      @idea = Idea.find(params[:id]) if not @idea and params[:id]
+      load_idea
 
-      if [:show, :show_feed, :update_status, :activities, :endorsers, :opposers, :opposer_points, :endorser_points, :neutral_points, :everyone_points,
+      if [:show, :show_feed, :move, :update_status, :activities, :endorsers, :opposers, :opposer_points, :endorser_points, :neutral_points, :everyone_points,
           :opposed_top_points, :endorsed_top_points, :idea_detail, :top_points, :discussions, :everyone_point].include?(action_name.to_sym)
         setup_main_ideas_menu
       else

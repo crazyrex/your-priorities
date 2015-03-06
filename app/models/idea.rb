@@ -84,7 +84,7 @@ class Idea < ActiveRecord::Base
   has_many :endorsers, :through => :endorsements, :conditions => "endorsements.status in ('active','inactive')", :source => :user, :class_name => "User"
   has_many :up_endorsers, :through => :endorsements, :conditions => "endorsements.status in ('active','inactive') and endorsements.value=1", :source => :user, :class_name => "User"
   has_many :down_endorsers, :through => :endorsements, :conditions => "endorsements.status in ('active','inactive') and endorsements.value=-1", :source => :user, :class_name => "User"
-    
+
   has_many :points, :conditions => "points.status in ('published','draft')"
   accepts_nested_attributes_for :points
 
@@ -775,7 +775,8 @@ class Idea < ActiveRecord::Base
 
   def flag_by_user(user)
     self.increment!(:flags_count)
-    for r in User.active.admins
+    default_sub_instance_id = SubInstance.where(:short_name=>"default").first.id
+    for r in User.active.admins.where("sub_instance_id = ? OR sub_instance_id = ?",default_sub_instance_id,user.sub_instance_id)
       notifications << NotificationIdeaFlagged.new(:sender => user, :recipient => r)
     end
   end  

@@ -2,6 +2,7 @@
   %head
     %meta{:content => "text/html; charset=utf-8", "http-equiv" => "Content-Type"}/
     %meta{:content => "width=device-width, initial-scale=1.0", :name => "viewport"}
+    %meta{:content => "f7bd4ff2ad1c2848-aabfe1f275c1cd8b-g5ca4676a77b8b93a-15", :name => "google-translate-customization"}/
     %title
       - if SubInstance.current and SubInstance.current.short_name!="default"
         = "#{@page_title || current_instance.name}"
@@ -32,14 +33,14 @@
     .large-12.columns
       .sticky.contain-to-grid
         = render :partial => "shared/top_navigation"
-  %br
+  .br
   .row
     .large-12.columns
       = render :partial => "sub_instances/message_to_users" if controller_name=="home"
   .row
     .large-12.columns
       = render :partial => "ads/pick"
-  .row
+  .row{:class=>"main_row"}
     .large-9.columns
       = flash_div :warning, :notice, :error
       = yield :layout
